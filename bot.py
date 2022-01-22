@@ -1,7 +1,7 @@
 import discord
 from discord_slash import SlashCommand
 import pandas as pd
-#from datetime import datetime
+from datetime import datetime
 import matplotlib.pyplot as plt
 import requests
 
