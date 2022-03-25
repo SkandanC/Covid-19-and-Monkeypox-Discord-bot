@@ -1,7 +1,7 @@
 import discord
 from discord_slash import SlashCommand
 import pandas as pd
-from datetime import datetime
+from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import requests
 
@@ -12,34 +12,6 @@ slash = SlashCommand(client, sync_commands=True)
 
 def main():
 
-    print("covidtesting")
-    response = requests.get('https://data.ontario.ca/dataset/f4f86e54-872d-43f8-8a86-3892fd3cb5e6/resource/ed270bb8-340b-41f9-a7c6-e8ef587e6d11/download/covidtesting.csv')
-    # Open file and write the content
-    with open('covidtesting.csv', 'wb') as file:
-        # A chunk of 128 bytes
-        for chunk in response:
-            file.write(chunk)
-    print("daily cases")
-    response = requests.get('https://data.ontario.ca/dataset/f4f86e54-872d-43f8-8a86-3892fd3cb5e6/resource/8a88fe6d-d8fb-41a3-9d04-f0550a44999f/download/daily_change_in_cases_by_phu.csv')
-    # Open file and write the content
-    with open('daily_change_in_cases_by_phu.csv', 'wb') as file:
-        # A chunk of 128 bytes
-        for chunk in response:
-            file.write(chunk)
-    print("hospitals")
-    response = requests.get('https://data.ontario.ca/dataset/8f3a449b-bde5-4631-ada6-8bd94dbc7d15/resource/e760480e-1f95-4634-a923-98161cfb02fa/download/region_hospital_icu_covid_data.csv')
-    # Open file and write the content
-    with open('region_hospital_icu_covid_data.csv', 'wb') as file:
-        # A chunk of 128 bytes
-        for chunk in response:
-            file.write(chunk)
-    print("active cases")
-    response = requests.get('https://data.ontario.ca/dataset/1115d5fe-dd84-4c69-b5ed-05bf0c0a0ff9/resource/d1bfe1ad-6575-4352-8302-09ca81f7ddfc/download/cases_by_status_and_phu.csv')
-    # Open file and write the content
-    with open('cases_by_status_and_phu.csv', 'wb') as file:
-        # A chunk of 128 bytes
-        for chunk in response:
-            file.write(chunk)
     client.run(token)
 
 @client.event
@@ -49,8 +21,9 @@ async def on_ready():
 
 @slash.slash(name="new",description="new COVID data")
 async def new(ctx):
+    await ctx.defer()
     embed=discord.Embed(title="New cases", color=discord.Colour.green())
-    daily_cases = pd.read_csv('daily_change_in_cases_by_phu.csv')
+    daily_cases = pd.read_csv('https://data.ontario.ca/dataset/f4f86e54-872d-43f8-8a86-3892fd3cb5e6/resource/8a88fe6d-d8fb-41a3-9d04-f0550a44999f/download/daily_change_in_cases_by_phu.csv')
     daily_cases = daily_cases.T
     daily_cases.head()
     y = []
@@ -59,7 +32,7 @@ async def new(ctx):
         y.append(daily_cases[len(daily_cases.T)-n][35])
         x.append(daily_cases[len(daily_cases.T)-n][0])
     y=y[-1]
-    deaths = pd.read_csv('covidtesting.csv')
+    deaths = pd.read_csv('https://data.ontario.ca/dataset/f4f86e54-872d-43f8-8a86-3892fd3cb5e6/resource/ed270bb8-340b-41f9-a7c6-e8ef587e6d11/download/covidtesting.csv')
     deaths2 = str(int(deaths.newly_reported_deaths[len(deaths)-1]))
     embed.add_field(name="New cases", value=y, inline=True)
     embed.add_field(name="New deaths", value=deaths2, inline=True)
@@ -80,7 +53,7 @@ async def graphsummary(ctx,*, days = 14):
     print("graph summary")
     y = []
     x = []
-    daily_cases = pd.read_csv('daily_change_in_cases_by_phu.csv')
+    daily_cases = pd.read_csv('https://data.ontario.ca/dataset/f4f86e54-872d-43f8-8a86-3892fd3cb5e6/resource/8a88fe6d-d8fb-41a3-9d04-f0550a44999f/download/daily_change_in_cases_by_phu.csv')
     daily_cases.head()
     daily_cases = daily_cases.T
     daily_cases = daily_cases
@@ -96,7 +69,7 @@ async def graphsummary(ctx,*, days = 14):
         ax = plt.plot(x,y,label='New cases')
         print(x)
         print(y)
-        hospitalisations = pd.read_csv('region_hospital_icu_covid_data.csv')
+        hospitalisations = pd.read_csv('https://data.ontario.ca/dataset/8f3a449b-bde5-4631-ada6-8bd94dbc7d15/resource/e760480e-1f95-4634-a923-98161cfb02fa/download/region_hospital_icu_covid_data.csv')
         hosp = []
         icu = []
         print(type(hospitalisations))
@@ -113,7 +86,7 @@ async def graphsummary(ctx,*, days = 14):
         ax = plt.plot(x,y,label='New cases')
         print(x)
         print(y)
-        hospitalisations = pd.read_csv('region_hospital_icu_covid_data.csv')
+        hospitalisations = pd.read_csv('https://data.ontario.ca/dataset/8f3a449b-bde5-4631-ada6-8bd94dbc7d15/resource/e760480e-1f95-4634-a923-98161cfb02fa/download/region_hospital_icu_covid_data.csv')
         hosp = []
         icu = []
         print(type(hospitalisations))
@@ -151,7 +124,7 @@ async def hospitalisations(ctx,*,days=14):
     print("hospitalizations")
     y = []
     x = []
-    daily_cases = pd.read_csv('daily_change_in_cases_by_phu.csv')
+    daily_cases = pd.read_csv('https://data.ontario.ca/dataset/f4f86e54-872d-43f8-8a86-3892fd3cb5e6/resource/8a88fe6d-d8fb-41a3-9d04-f0550a44999f/download/daily_change_in_cases_by_phu.csv')
     daily_cases.head()
     daily_cases = daily_cases.T
     daily_cases = daily_cases
@@ -170,7 +143,7 @@ async def hospitalisations(ctx,*,days=14):
         for i in range(len(x)):
             x[i] = datetime.strptime(x[i], '%Y-%m-%d').date()
     fig,ax = plt.subplots(figsize=(10,5))
-    hospitalisations = pd.read_csv('region_hospital_icu_covid_data.csv')
+    hospitalisations = pd.read_csv('https://data.ontario.ca/dataset/8f3a449b-bde5-4631-ada6-8bd94dbc7d15/resource/e760480e-1f95-4634-a923-98161cfb02fa/download/region_hospital_icu_covid_data.csv')
     date  = hospitalisations
     date = date.T
     hosp = []
@@ -217,7 +190,7 @@ async def positivity(ctx,*,days=14):
     days = int(days)
     print("positivity")
     x = []
-    daily_cases = pd.read_csv('covidtesting.csv')
+    daily_cases = pd.read_csv('https://data.ontario.ca/dataset/f4f86e54-872d-43f8-8a86-3892fd3cb5e6/resource/ed270bb8-340b-41f9-a7c6-e8ef587e6d11/download/covidtesting.csv')
     daily_cases.head()
     daily_cases = daily_cases.T
     x = []
@@ -248,18 +221,35 @@ async def positivity(ctx,*,days=14):
     plt.legend()
     fig.savefig('posit.png',bbox_inches='tight')
     embed= discord.Embed(color=discord.Colour.green())
-    embed.add_field(name='Summary over past ' + str(days) + ' days:',value = 'Positivity rate (%)')
+    embed.add_field(name='Summary over past ' + str(days) + ' days:', value = 'Positivity rate (%)')
     file = discord.File("posit.png")
     embed.set_image(url="attachment://posit.png")
     embed.add_field(name='\u200b', value='[Source](https://data.ontario.ca/dataset/f4f86e54-872d-43f8-8a86-3892fd3cb5e6/resource/ed270bb8-340b-41f9-a7c6-e8ef587e6d11/download/covidtesting.csv)', inline=True)
+    await ctx.send(embed=embed,file=file)
+
+@slash.slash(name="Wastewater",description="Graph of covid gene traces in Ontario's wastewater")
+async def Wastewater(ctx):
+   
+    await ctx.defer()
+    print("Re\n")
+    url = 'https://covid19-sciencetable.ca/wp-content/uploads/2022/03/' + (datetime.now()-timedelta(1)).strftime("%Y-%m-%d") + '-Province-Wide-COVID-19-Wastewater-Signal-in-Ontario.png'
+    img_data = requests.get(url).content
+    with open('wastewater.jpg', 'wb') as handler:
+        handler.write(img_data)
+    
+    embed= discord.Embed(color=discord.Colour.green())
+    embed.add_field(name="Covid-19 N1 and N2 gene standardized concentrations in Ontario's wastewater", value='\u200b')
+    file = discord.File("wastewater.jpg")
+    embed.set_image(url="attachment://wastewater.jpg")
+    embed.add_field(name='\u200b', value=f'[Source]({url})', inline=True)
     await ctx.send(embed=embed,file=file)
 
 @slash.slash(name="total",description="total COVID data")
 async def total(ctx):
     print("Total data")
     await ctx.defer()
-    deaths = pd.read_csv('covidtesting.csv')
-    total_active = pd.read_csv('cases_by_status_and_phu.csv')
+    deaths = pd.read_csv('https://data.ontario.ca/dataset/f4f86e54-872d-43f8-8a86-3892fd3cb5e6/resource/ed270bb8-340b-41f9-a7c6-e8ef587e6d11/download/covidtesting.csv')
+    total_active = pd.read_csv('https://data.ontario.ca/dataset/1115d5fe-dd84-4c69-b5ed-05bf0c0a0ff9/resource/d1bfe1ad-6575-4352-8302-09ca81f7ddfc/download/cases_by_status_and_phu.csv')
     active = total_active.loc[total_active['FILE_DATE']==str(total_active['FILE_DATE'][len(total_active)-1]),'ACTIVE_CASES'].sum()
     print(active)
     total_cases = str(int(deaths['Total Cases'][len(deaths)-1]))
@@ -300,6 +290,7 @@ async def help(ctx):
     embed.add_field(name='```graphsummary```', value='Returns a graph of cases, hospitalizations and ICUs over the last two weeks')
     embed.add_field(name='```hospitalizations```', value='Returns a graph of hospitalizations and ICUs over the last two weeks')
     embed.add_field(name='```positivity```', value='Returns a graph of positivity rate (%) over the last two weeks')
+    embed.add_field(name='```wastewater```', value="Returns a graph of Covid N1 and N2 gene in Ontario's wastewater")
     await ctx.send(embed=embed)
 
 def Vaccine(value):
@@ -317,7 +308,7 @@ def Vaccine(value):
         boosted = vaccine_data[cond].third_dose_cumulative[-1:]
         boosted = format(int(list(boosted)[0]),',d')
         boostedpercent = vaccine_data[cond].Percent_3doses[-1:]*100
-        boostedpercent = str(list(partpercent)[0])
+        boostedpercent = str(list(boostedpercent)[0])
         total_data = pd.read_csv('https://data.ontario.ca/dataset/752ce2b7-c15a-4965-a3dc-397bf405e7cc/resource/8a89caa9-511c-4568-af89-7f2174b4378c/download/vaccine_doses.csv')
         if value == 0:
             daily_doses = total_data.previous_day_total_doses_administered[-1:]
