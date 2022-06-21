@@ -4,7 +4,9 @@ import pandas as pd
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
 import requests
-
+import seaborn as sns
+sns.set_theme(style="darkgrid")
+sns.set_palette("deep")
 
 # discord bot token
 token = 'token'
