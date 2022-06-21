@@ -16,7 +16,7 @@ If you'd like to contribute with areas such as code improvement, or data visuali
 
 For COVID-19 data:
 
-- The bot pulls all its data from [here for the case numbers](https://data.ontario.ca/dataset?q=covid) and here for the wastewater data](https://covid19-sciencetable.ca/ontario-dashboard/)
+- The bot pulls all its data from [here for the case numbers](https://data.ontario.ca/dataset?q=covid) and [here for the wastewater data](https://covid19-sciencetable.ca/ontario-dashboard/)
 
 - The bot parses and extracts the data, plots the case numbers and embed the plots in a discord `Embed` object
 
