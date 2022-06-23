@@ -134,17 +134,41 @@ async def monkeypox(ctx):
 
     # sort by country and extract top 5 countries with highest monkeypox cases
     countries = {country: confirmed[confirmed.Country == country].shape[0] for country in confirmed.Country.unique()}
+    dates = confirmed.Date_last_modified.unique()
+    cumulative_cases = {}
+    for date in dates:
+        cases = sum(d == date for d in confirmed.Date_last_modified)
+        cumulative_cases[date] = cases
+    cumulative = pd.Series(cumulative_cases.values()).cumsum().tolist()
     top_5 = sorted(countries, key=countries.get, reverse=True)[:5]
 
-    # initializze and edit embed
+    # get last date
+    date = confirmed.iloc[-1]['Date_last_modified']
+
+    # plot cumulative cases
+    _, ax = plt.subplots()
+    plt.plot(dates, cumulative)
+    plt.xlabel('Date', fontsize=12)
+    plt.ylabel('Cumulative cases', fontsize=12)
+    plt.xticks(fontsize=8)
+    plt.yticks(fontsize=8)
+    plt.fill_between(dates, cumulative)
+    ax.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(5))
+    plt.setp(ax.get_xticklabels(), rotation=30, horizontalalignment='right')
+    plt.savefig('monkeypox.png', bbox_inches='tight')
+    # initialize and edit embed
     embed = discord.Embed(title="Global top 5 monkeypox cases (and in Canada)", color=discord.Colour.green())
     for country in top_5:
         embed.add_field(name=country, value=countries[country], inline=True)
     if 'Canada' not in top_5:
         embed.add_field(name='Canada', value=countries['Canada'], inline=True)
     embed.add_field(name='\u200b', value='[Source for data](https://raw.githubusercontent.com/globaldothealth/monkeypox/main/latest.csv)', inline=True)
+    file = discord.File("monkeypox.png")
+    embed.set_image(url="attachment://monkeypox.png")
 
-    await ctx.send(embed=embed)
+    embed.set_footer(text=f'Last updated: {date}')
+
+    await ctx.send(embed=embed, file=file)
 
 
 # help command
