@@ -131,14 +131,16 @@ async def monkeypox(ctx):
 
     # extract confirmed cases and neglect suspected and discarded cases
     confirmed = df.loc[df['Status'] == 'confirmed']
-
+    
     # sort by country and extract top 5 countries with highest monkeypox cases
     countries = {country: confirmed[confirmed.Country == country].shape[0] for country in confirmed.Country.unique()}
     dates = confirmed.Date_last_modified.unique()
+    dates.sort()
     cumulative_cases = {}
     for date in dates:
         cases = sum(d == date for d in confirmed.Date_last_modified)
         cumulative_cases[date] = cases
+    dates = [datetime.strptime(date, '%Y-%m-%d').date() for date in dates]
     cumulative = pd.Series(cumulative_cases.values()).cumsum().tolist()
     top_5 = sorted(countries, key=countries.get, reverse=True)[:5]
 
@@ -154,7 +156,6 @@ async def monkeypox(ctx):
     plt.yticks(fontsize=8)
     plt.fill_between(dates, cumulative)
     ax.xaxis.set_major_locator(matplotlib.ticker.MaxNLocator(5))
-    plt.setp(ax.get_xticklabels(), rotation=30, horizontalalignment='right')
     plt.savefig('monkeypox.png', bbox_inches='tight')
     # initialize and edit embed
     embed = discord.Embed(title="Global top 5 monkeypox cases (and in Canada)", color=discord.Colour.green())
